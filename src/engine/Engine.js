@@ -32,6 +32,12 @@ export class Engine {
     if (this.ready) return;
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
 
+    // iOS/Safari: AudioContext starts suspended without a user gesture.
+    // Resume it on the first tap so all subsequent audio calls work.
+    const _unlock = () => this.ctx.resume();
+    document.addEventListener('pointerdown', _unlock, { once: true, passive: true });
+    document.addEventListener('touchstart',  _unlock, { once: true, passive: true });
+
     // Prebuilt noise buffers
     this.noiseBuf = this.ctx.createBuffer(1, this.ctx.sampleRate * 2, this.ctx.sampleRate);
     { const d = this.noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
