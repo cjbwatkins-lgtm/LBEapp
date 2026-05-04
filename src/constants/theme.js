@@ -9,6 +9,8 @@ export const DARK = {
   alert: "#c44040", alertSoft: "#8a3030",
   ok: "#38a868",
   mode: "dark",
+  // App aliases
+  bg: "#08090d", txt: "#b8bdd0", warn: "#d4781c", err: "#c44040",
 };
 
 export const LIGHT = {
@@ -21,6 +23,8 @@ export const LIGHT = {
   alert: "#8A4040", alertSoft: "#6A4848",
   ok: "#4A7A52",
   mode: "light",
+  // App aliases
+  bg: "#D9D3C8", txt: "#262422", warn: "#8E553A", err: "#8A4040",
 };
 
 // ─── FOCUS TIMER MODES ──────────────────────────────────────────────────────
@@ -29,4 +33,5 @@ export const FOCUS_MODES = [
   { id: "standard", label: "Standard", work: 25, brk: 5 },
   { id: "deep",     label: "Deep",     work: 50, brk: 10 },
   { id: "extended", label: "Extended", work: 90, brk: 20 },
+  { id: "custom",   label: "Custom",   work: 20, brk: 5 },
 ];

@@ -32,6 +32,13 @@ export class Engine {
     if (this.ready) return;
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
 
+    // iOS Safari suspends AudioContext until a user gesture — resume on first interaction
+    if (this.ctx.state === 'suspended') {
+      const resume = () => this.ctx.resume();
+      document.addEventListener('touchstart', resume, { once: true, passive: true });
+      document.addEventListener('click', resume, { once: true });
+    }
+
     // Prebuilt noise buffers
     this.noiseBuf = this.ctx.createBuffer(1, this.ctx.sampleRate * 2, this.ctx.sampleRate);
     { const d = this.noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
@@ -67,10 +74,6 @@ export class Engine {
     this.metBus = this.ctx.createGain(); this.metBus.gain.value = 0.50;
     this.fretBus = this.ctx.createGain(); this.fretBus.gain.value = 0.60;
     this.noiseBus = this.ctx.createGain(); this.noiseBus.gain.value = 0;
-    this.droneBus.connect(this.master);
-    this.metBus.connect(this.master);
-    this.fretBus.connect(this.master);
-    this.noiseBus.connect(this.master);
 
     // Master chain: HP → tilt → comp → limiter → destination
     this.hp = this.ctx.createBiquadFilter(); this.hp.type = "highpass"; this.hp.frequency.value = 28; this.hp.Q.value = 0.7;
@@ -84,6 +87,14 @@ export class Engine {
     this.tilt.connect(this.comp);
     this.comp.connect(this.lim);
     this.lim.connect(this.ctx.destination);
+
+    // Drone and fretboard go through the full chain (comp glues sustained content)
+    this.droneBus.connect(this.master);
+    this.fretBus.connect(this.master);
+    // Metronome and noise bypass the comp — prevents clicks from pumping the drone
+    this.metBus.connect(this.lim);
+    this.noiseBus.connect(this.lim);
+
     this.ready = true;
   }
 
@@ -380,5 +391,53 @@ export class Engine {
     } else {
       this.noiseRes.gain.linearRampToValueAtTime(0, n);
     }
+  }
+
+  // ─── VOLUME SETTERS ─────────────────────────────────────────────────
+  setMasterVolume(v) {
+    if (!this.master) return;
+    this.master.gain.setTargetAtTime(v, this.ctx.currentTime, 0.02);
+  }
+  setDroneVolume(v) {
+    if (!this.droneBus) return;
+    this.droneBus.gain.setTargetAtTime(v, this.ctx.currentTime, 0.02);
+  }
+  setMetVolume(v) {
+    if (!this.metBus) return;
+    this.metBus.gain.setTargetAtTime(v, this.ctx.currentTime, 0.02);
+  }
+
+  // ─── DRONE CONVENIENCE ──────────────────────────────────────────────
+  stopDrone() { this.killAll(); }
+
+  startDroneNotes(root, oct, texture, harmNotes) {
+    const NOTES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    const rootIdx = NOTES.indexOf(root);
+    if (rootIdx < 0) { this.killAll(); return; }
+    const rootMidi = (oct + 1) * 12 + rootIdx;
+    const midis = [rootMidi];
+    (harmNotes || []).forEach(n => {
+      if (!n) return;
+      const idx = NOTES.indexOf(n);
+      if (idx < 0) return;
+      let m = (oct + 1) * 12 + idx;
+      if (m <= rootMidi) m += 12;
+      if (m !== rootMidi) midis.push(m);
+    });
+    this.startCustomDrone(midis, texture);
+  }
+
+  // ─── FRET CHIME ─────────────────────────────────────────────────────
+  playChime(noteIdx, vol = 1.0) {
+    if (!this.ctx) return;
+    this.playNote(48 + (noteIdx % 12), 1.8 * vol);
+  }
+
+  // ─── GLOBAL PAUSE/RESUME ────────────────────────────────────────────
+  pauseAll() {
+    if (this.ctx?.state === 'running') this.ctx.suspend();
+  }
+  resumeAll() {
+    if (this.ctx?.state === 'suspended') this.ctx.resume();
   }
 }
