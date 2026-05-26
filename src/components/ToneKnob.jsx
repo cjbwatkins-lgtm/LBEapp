@@ -1,37 +1,46 @@
 import { useState, useRef } from 'react';
-import { dbStart, dbEnd, dbSetMove, dbSetUp } from '../hooks';
 
 export function ToneKnob({ value, onChange, label, color, T }) {
   const dragRef = useRef(null);
   const [dragging, setDragging] = useState(false);
   const r = 22;
-  const [preview, setPreview] = useState(null);
   const rafRef = useRef(0);
   const liveRef = useRef(value);
-  const display = dragging && preview !== null ? preview : value;
-  const pct = (display + 1) / 2;
+  const pct = (value + 1) / 2;
   const angle = pct * 280 - 140;
+  const c = color || T.cool;
+  const toneLabel = value < -0.5 ? "Dark" : value < -0.15 ? "Warm" : value > 0.5 ? "Bright" : value > 0.15 ? "Airy" : "Flat";
 
   const onDown = (e) => {
     e.preventDefault();
-    dragRef.current = { y: e.clientY, v: value }; liveRef.current = value; setDragging(true);
-    dbSetMove((ev) => {
-      ev.preventDefault(); if (!dragRef.current) return;
+    dragRef.current = { y: e.clientY, v: value };
+    liveRef.current = value;
+    setDragging(true);
+
+    const onMove = (ev) => {
+      ev.preventDefault();
+      if (!dragRef.current) return;
       const dy = dragRef.current.y - ev.clientY;
       const nv = Math.round(Math.min(1, Math.max(-1, dragRef.current.v + dy * 0.012)) * 100) / 100;
       liveRef.current = nv;
       cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => { setPreview(nv); onChange(nv); });
-    });
-    dbSetUp(() => {
-      cancelAnimationFrame(rafRef.current); onChange(liveRef.current);
-      setPreview(null); setDragging(false); dbEnd();
-    });
-    dbStart();
-  };
+      rafRef.current = requestAnimationFrame(() => onChange(nv));
+    };
 
-  const c = color || T.cool;
-  const toneLabel = display < -0.5 ? "Dark" : display < -0.15 ? "Warm" : display > 0.5 ? "Bright" : display > 0.15 ? "Airy" : "Flat";
+    const onUp = () => {
+      cancelAnimationFrame(rafRef.current);
+      onChange(liveRef.current);
+      setDragging(false);
+      dragRef.current = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  };
 
   return (
     <div className="flex flex-col items-center gap-0.5 select-none" style={{ width: 56 }}>
@@ -41,11 +50,11 @@ export function ToneKnob({ value, onChange, label, color, T }) {
           <circle cx={r + 3} cy={r + 3} r={r} fill="none" stroke={T.line} strokeWidth={2}
             strokeDasharray={`${r * 2 * Math.PI * .78} ${r * 2 * Math.PI * .22}`}
             transform={`rotate(131 ${r + 3} ${r + 3})`} />
-          {Math.abs(display) > 0.02 && (
+          {Math.abs(value) > 0.02 && (
             <circle cx={r + 3} cy={r + 3} r={r} fill="none" stroke={c} strokeWidth={2.5}
               strokeLinecap="round" opacity={.8}
               strokeDasharray={`${r * 2 * Math.PI * .78 * Math.abs(pct - 0.5)} ${r * 2 * Math.PI}`}
-              transform={`rotate(${display >= 0 ? 131 + 280 * 0.5 : 131 + 280 * pct} ${r + 3} ${r + 3})`} />
+              transform={`rotate(${value >= 0 ? 131 + 280 * 0.5 : 131 + 280 * pct} ${r + 3} ${r + 3})`} />
           )}
         </svg>
         <div className="absolute rounded-full" style={{ inset: 6, background: `radial-gradient(circle at 42% 38%,${T.panel},${T.bg2})`, border: `1px solid ${dragging ? c + "40" : T.line}`, transition: "border-color 180ms ease" }} />

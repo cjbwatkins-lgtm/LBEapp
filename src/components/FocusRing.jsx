@@ -6,15 +6,21 @@ export function FocusRing({ progress, phase, T, secsLeft, isPaused, justStarted 
   const stroke = circ * progress;
   const workColor = T.accent;
   const breakColor = T.ok;
-  const ringColor = isPaused ? T.muted : phase === "break" ? breakColor : workColor;
+  const isBreakPhase = phase === "break" || phase === "break_done";
+  const ringColor = isPaused ? T.muted : isBreakPhase ? breakColor : workColor;
   const mm = pad2(Math.floor(secsLeft / 60));
   const ss = pad2(secsLeft % 60);
-  const label = isPaused ? "Paused" : phase === "idle" ? "Ready" : phase === "work" ? "Focus" : "Break";
-  const labelColor = isPaused ? T.muted : phase === "break" ? breakColor : phase === "work" ? workColor : T.dim;
+  const label = isPaused ? "Paused"
+    : phase === "work_done"  ? "Done!"
+    : phase === "break_done" ? "Ready"
+    : phase === "break"      ? "Break"
+    : phase === "work"       ? "Focus"
+    : "Ready";
+  const labelColor = isPaused ? T.muted : isBreakPhase ? breakColor : phase === "work" ? workColor : T.dim;
   const ringStroke = phase === "work" && !isPaused ? 5 : 4;
 
   return (
-    <div className={`relative flex items-center justify-center ${phase === "work" && !isPaused ? "lbe-focus-breathe" : ""} ${justStarted ? "lbe-ring-lock" : ""} ${isPaused ? "lbe-ring-paused" : ""}`}
+    <div className={`relative flex items-center justify-center ${phase === "work" && !isPaused ? "lbe-focus-breathe" : ""} ${phase === "work_done" || phase === "break_done" ? "lbe-ring-done" : ""} ${justStarted ? "lbe-ring-lock" : ""} ${isPaused ? "lbe-ring-paused" : ""}`}
       style={{ width: 180, height: 180 }}>
       <svg viewBox="0 0 160 160" className="absolute inset-0 lbe-ring-glow" style={{ width: "100%", height: "100%" }}>
         <circle cx="80" cy="80" r={r} fill="none" stroke={T.line} strokeWidth={4} opacity={0.5} />

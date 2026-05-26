@@ -13,16 +13,16 @@ export const TUNINGS = {
   6: { label: "6-String", strings: ["B","E","A","D","G","C"], midi: [35,40,45,50,55,60] },
 };
 
-export const TEXTURES = [
-  { id: "bassGuitar", name: "Bass Guitar", sub: "Electric bass tone" },
-  { id: "organPad",   name: "Organ Pad",   sub: "Hammond drawbar keys" },
-  { id: "rhodesEP",   name: "Rhodes EP",   sub: "Electric piano warmth" },
-  { id: "deepEarth",  name: "Deep Earth",  sub: "Sub-heavy" },
-  { id: "vintageWarmth", name: "Vintage Warmth", sub: "Analog synth pad" },
-  { id: "silkBow",    name: "Silk Bow",    sub: "Bowed string sustain" },
-  { id: "airyGlass",  name: "Singing Bowl", sub: "Resonant bell tones" },
-  { id: "pureBreath",  name: "Pure Breath",  sub: "Beating sines" },
-];
+export const TEXTURES = {
+  bassGuitar:    { name: "Bass Guitar",    sub: "Electric bass tone" },
+  organPad:      { name: "Organ Pad",      sub: "Hammond drawbar keys" },
+  rhodesEP:      { name: "Rhodes EP",      sub: "Electric piano warmth" },
+  deepEarth:     { name: "Deep Earth",     sub: "Sub-heavy" },
+  vintageWarmth: { name: "Vintage Warmth", sub: "Analog synth pad" },
+  silkBow:       { name: "Silk Bow",       sub: "Bowed string sustain" },
+  airyGlass:     { name: "Singing Bowl",   sub: "Resonant bell tones" },
+  pureBreath:    { name: "Pure Breath",    sub: "Beating sines" },
+};
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 export const noteName = (m) => NOTES[((m % 12) + 12) % 12];

@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+body {
+  font-family: 'Barlow Condensed', system-ui, -apple-system, sans-serif;
+}
+
+@keyframes beatPulse {
+  0%   { opacity: 1; transform: scale(1.4); }
+  100% { opacity: 0.3; transform: scale(1); }
+}
+
 /* ═══ MOTION TUNING VARIABLES ═══ */
 :root {
   --ease-main: cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -11,15 +20,15 @@
 
 /* ═══ THEME: DARK (Studio) ═══ */
 [data-theme="dark"] {
-  --bg: #0d0f16; --bg2: #13161f; --bg3: #1a1e2e; --panel: #1a1e2e; --panel2: #202538;
-  --border: #232840; --border2: #2d3352; --text: #b8bdd0; --text2: #8b92a8;
-  --accent: #e8a838; --accent2: #c4882a; --accent-a15: rgba(232,168,56,.15); --accent-a40: rgba(232,168,56,.4);
-  --shadow-color: rgba(0,0,0,.35); --shadow-warm: rgba(0,0,0,.25);
-  --ring-color: rgba(232,168,56,.45); --focus-shadow: 0 0 0 2px rgba(232,168,56,.3);
-  --drift-a: rgba(35,40,64,0.25); --drift-b: rgba(13,15,22,0);
-  --texture-opacity: 0.015; --noise-blend: overlay;
+  --bg: #0b1220; --bg2: #0f1828; --bg3: #131e33; --panel: #131e33; --panel2: #182540;
+  --border: #1c2840; --border2: #253354; --text: #b2c0d2; --text2: #7890aa;
+  --accent: #d4a020; --accent2: #b08418; --accent-a15: rgba(212,160,32,.15); --accent-a40: rgba(212,160,32,.4);
+  --shadow-color: rgba(0,0,0,.5); --shadow-warm: rgba(0,0,0,.35);
+  --ring-color: rgba(212,160,32,.45); --focus-shadow: 0 0 0 2px rgba(212,160,32,.3);
+  --drift-a: rgba(28,40,64,0.3); --drift-b: rgba(8,14,26,0);
+  --texture-opacity: 0.018; --noise-blend: overlay;
   --phase-work-filter: saturate(1.04) brightness(1.0); --phase-break-filter: saturate(0.7) brightness(1.04);
-  --string-color: rgba(184,189,208,0.08); --string-glow: rgba(232,168,56,0.04);
+  --string-color: rgba(178,192,210,0.07); --string-glow: rgba(212,160,32,0.04);
 }
 
 /* ═══ THEME: DAYLIGHT (Low-Glare Warm Matte) ═══ */
@@ -61,7 +70,7 @@
   position: fixed; z-index: 9999; pointer-events: none; border-radius: 50%;
   animation: lbe-theme-grow 550ms cubic-bezier(0.22,0.61,0.36,1) forwards, lbe-theme-fade-out 650ms ease forwards;
 }
-.lbe-theme-wipe-dark { background: radial-gradient(circle, #1a1e2e 0%, #0d0f16 70%); }
+.lbe-theme-wipe-dark { background: radial-gradient(circle, #182540 0%, #0b1220 70%); }
 .lbe-theme-wipe-light { background: radial-gradient(circle, #D1CBBF 0%, #D9D3C8 70%); }
 
 /* ═══ AMBIENT LIGHT DRIFT ═══ */
@@ -214,7 +223,7 @@
 .lbe-confirm-in { animation: lbe-confirm-in 160ms var(--ease-main) forwards; }
 
 /* ═══ TABULAR DIGITS ═══ */
-.lbe-digits { font-variant-numeric: tabular-nums; transition: color 300ms var(--ease-main), opacity 300ms ease; }
+.lbe-digits { font-family: 'Space Mono', 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; transition: color 300ms var(--ease-main), opacity 300ms ease; }
 
 /* ═══ INK-IN TEXT ═══ */
 @keyframes lbe-ink-in { 0% { opacity: 0; letter-spacing: 0.08em; } 100% { opacity: 1; letter-spacing: 0.01em; } }
@@ -253,6 +262,18 @@
 
 /* ═══ PAUSE DESATURATE ═══ */
 .lbe-ring-paused { filter: saturate(0.6) opacity(0.7); transition: filter 200ms ease; }
+
+/* ═══ DONE PULSE ═══ */
+@keyframes lbe-ring-done { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.012); opacity: 0.92; } }
+.lbe-ring-done { animation: lbe-ring-done 2.4s ease-in-out infinite; }
+
+/* ═══ BEAT DOT FLASH ═══ */
+@keyframes lbe-beat-dot { 0% { transform: scale(1.55); box-shadow: 0 0 0 7px var(--accent-a40), 0 0 14px var(--accent-a40); } 60% { transform: scale(1.1); } 100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; } }
+@keyframes lbe-beat-dot-sub { 0% { transform: scale(1.35); box-shadow: 0 0 0 5px rgba(46,168,104,.45); } 60% { transform: scale(1.05); } 100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; } }
+@keyframes lbe-beat-dot-ghost { 0% { transform: scale(1.2); box-shadow: 0 0 0 3px rgba(255,255,255,.12); } 100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; } }
+.lbe-beat-dot { animation: lbe-beat-dot 340ms cubic-bezier(0.2,0,0.4,1) forwards; }
+.lbe-beat-dot-sub { animation: lbe-beat-dot-sub 260ms cubic-bezier(0.2,0,0.4,1) forwards; }
+.lbe-beat-dot-ghost { animation: lbe-beat-dot-ghost 200ms ease-out forwards; }
 
 /* ═══ CYCLE HALO ═══ */
 @keyframes lbe-halo { 0% { box-shadow: 0 0 0 0 var(--accent-a40), 0 0 20px var(--accent-a15); } 100% { box-shadow: 0 0 0 12px transparent, 0 0 0 transparent; } }

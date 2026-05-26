@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FRETS, MARKERS, TUNINGS, ENHARMONICS, enharmonic, noteName, intervalName } from '../constants';
 
 // ─── SINGLE FRET NOTE ──────────────────────────────────────────────────────
-function Fret({ midi, lit, rootMidi, onClick, T, droning, customMode, stringIdx, fretIdx, droneActive, isMobile }) {
+function Fret({ midi, lit, rootMidi, onClick, T, droning, customMode, stringIdx, fretIdx, droneActive, isMobile, showAllOctaves }) {
   const nn = noteName(midi);
   const flat = ENHARMONICS[nn];
   const [ripple, setRipple] = useState(0);
@@ -17,8 +17,8 @@ function Fret({ midi, lit, rootMidi, onClick, T, droning, customMode, stringIdx,
       bg = `${T.bg3}c0`; border = `1px solid ${T.line}60`; txt = T.muted; shadow = "none";
     }
   } else {
-    const isLit = lit !== null && midi % 12 === lit % 12;
-    const isRoot = rootMidi !== null && midi % 12 === rootMidi % 12;
+    const isLit = lit !== null && (showAllOctaves ? midi % 12 === lit % 12 : midi === lit);
+    const isRoot = rootMidi !== null && (showAllOctaves ? midi % 12 === rootMidi % 12 : midi === rootMidi);
     if (isRoot) {
       bg = `radial-gradient(circle,${T.accent}30,${T.bg2}e0)`; border = `2px solid ${T.accent}80`;
       txt = T.accentGlow; shadow = `0 0 14px ${T.accent}50`;
@@ -51,7 +51,7 @@ function Fret({ midi, lit, rootMidi, onClick, T, droning, customMode, stringIdx,
 }
 
 // ─── HORIZONTAL FRETBOARD (desktop / tablet) ────────────────────────────────
-function HorizontalBoard({ count, lit, rootMidi, onFretClick, T, droningKeys, customMode, droneActive }) {
+function HorizontalBoard({ count, lit, rootMidi, onFretClick, T, droningKeys, customMode, droneActive, showAllOctaves }) {
   const t = TUNINGS[count];
   const drSet = new Set(droningKeys || []);
 
@@ -92,7 +92,8 @@ function HorizontalBoard({ count, lit, rootMidi, onFretClick, T, droningKeys, cu
                         style={{ width: f === 0 ? 38 : 42, height: 35, borderLeft: f === 1 ? `3px solid ${T.muted}50` : f > 1 ? `1px solid ${T.line}35` : "none" }}>
                         <Fret midi={midi} lit={lit} rootMidi={rootMidi} onClick={onFretClick} T={T}
                           droning={drSet.has(`${si}-${f}`)} customMode={customMode}
-                          stringIdx={si} fretIdx={f} droneActive={droneActive} isMobile={false} />
+                          stringIdx={si} fretIdx={f} droneActive={droneActive} isMobile={false}
+                          showAllOctaves={showAllOctaves} />
                       </div>
                     );
                   })}
@@ -122,7 +123,7 @@ function HorizontalBoard({ count, lit, rootMidi, onFretClick, T, droningKeys, cu
 
 // ─── VERTICAL FRETBOARD (mobile) ────────────────────────────────────────────
 // Strings run left-to-right (low to high), frets run top-to-bottom
-function VerticalBoard({ count, lit, rootMidi, onFretClick, T, droningKeys, customMode, droneActive }) {
+function VerticalBoard({ count, lit, rootMidi, onFretClick, T, droningKeys, customMode, droneActive, showAllOctaves }) {
   const t = TUNINGS[count];
   const drSet = new Set(droningKeys || []);
   const fretCount = 13; // Show fewer frets on mobile (0-12)
@@ -158,7 +159,8 @@ function VerticalBoard({ count, lit, rootMidi, onFretClick, T, droningKeys, cust
                   <div key={si} className="flex items-center justify-center" style={{ flex: 1, maxWidth: 52 }}>
                     <Fret midi={midi} lit={lit} rootMidi={rootMidi} onClick={onFretClick} T={T}
                       droning={drSet.has(`${si}-${f}`)} customMode={customMode}
-                      stringIdx={si} fretIdx={f} droneActive={droneActive} isMobile={true} />
+                      stringIdx={si} fretIdx={f} droneActive={droneActive} isMobile={true}
+                      showAllOctaves={showAllOctaves} />
                   </div>
                 );
               })}
@@ -181,11 +183,13 @@ function VerticalBoard({ count, lit, rootMidi, onFretClick, T, droningKeys, cust
 }
 
 // ─── BOARD (responsive wrapper) ─────────────────────────────────────────────
-export function Board({ count, lit, rootMidi, onFretClick, T, droningKeys, customMode, droneActive, isMobile }) {
+export function Board({ count, lit, rootMidi, onFretClick, T, droningKeys, customMode, droneActive, isMobile, showAllOctaves }) {
   if (isMobile) {
     return <VerticalBoard count={count} lit={lit} rootMidi={rootMidi} onFretClick={onFretClick}
-      T={T} droningKeys={droningKeys} customMode={customMode} droneActive={droneActive} />;
+      T={T} droningKeys={droningKeys} customMode={customMode} droneActive={droneActive}
+      showAllOctaves={showAllOctaves} />;
   }
   return <HorizontalBoard count={count} lit={lit} rootMidi={rootMidi} onFretClick={onFretClick}
-    T={T} droningKeys={droningKeys} customMode={customMode} droneActive={droneActive} />;
+    T={T} droningKeys={droningKeys} customMode={customMode} droneActive={droneActive}
+    showAllOctaves={showAllOctaves} />;
 }
